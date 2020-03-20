@@ -9,8 +9,21 @@ class EmployeeSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ("created_at", "updated_at")
 
+    def validate_name(self, value):
+        if value == "Karim":
+            raise serializers.ValidationError("You are Blocked")
+        else:
+            return value
+
     def create(self, validated_data):
         obj = super().create(validated_data)
         obj.created_at = timezone.now()
+        obj.save()
+        return obj
+
+    def update(self, instance, validated_data):
+        old_created_at = instance.created_at
+        obj = super().update(instance, validated_data)
+        obj.updated_at = timezone.now()
         obj.save()
         return obj

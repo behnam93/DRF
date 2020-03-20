@@ -19,3 +19,32 @@ def post_employee(request):
         return Response(ser.data, status=status.HTTP_201_CREATED)
     else:
         return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def get_employees(request):
+    employees = Employee.objects.all()
+    ser = EmployeeSerializer(employees, many=True)
+    return Response(ser.data, status=status.HTTP_200_OK)
+
+
+@api_view(['PUT', 'GET', 'DELETE'])
+def get_update_delete_employee(request, pk):
+    try:
+        employee = Employee.objects.get(pk=pk)
+    except:
+        return Response({"error": "Not Found"}, status=status.HTTP_404_NOT_FOUND)
+    if request.method == 'GET':
+        ser = EmployeeSerializer(employee)
+        return Response(ser.data, status=status.HTTP_200_OK)
+    elif request.method == 'PUT':
+        ser = EmployeeSerializer(employee, data=request.data)
+        if ser.is_valid():
+            ser.save()
+            return Response(ser.data, status=status.HTTP_200_OK)
+        else:
+            return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'DELETE':
+        employee.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
